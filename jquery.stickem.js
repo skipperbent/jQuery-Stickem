@@ -72,31 +72,42 @@
 				$container: $this.parents(_self.config.container),
 				isStuck: false
 			};
+			
+			var loaded=function() {
+				//If the element is smaller than the window
+				if(_self.windowHeight > item.elemHeight) {
+					item.containerHeight = item.$container.outerHeight();
+					item.containerInner = {
+						border: {
+							bottom: parseInt(item.$container.css('border-bottom'), 10) || 0,
+							top: parseInt(item.$container.css('border-top'), 10) || 0
+						},
+						padding: {
+							bottom: parseInt(item.$container.css('padding-bottom'), 10) || 0,
+							top: parseInt(item.$container.css('padding-top'), 10) || 0
+						}
+					};
+					
+					item.containerInnerHeight = item.$container.height();
+					item.containerStart = item.$container.offset().top - _self.config.offset + _self.config.start + item.containerInner.padding.top + item.containerInner.border.top;
+					item.scrollFinish = item.containerStart - _self.config.start + (item.containerInnerHeight - item.elemHeight);
 
-			//If the element is smaller than the window
-			if(_self.windowHeight > item.elemHeight) {
-				item.containerHeight = item.$container.outerHeight();
-				item.containerInner = {
-					border: {
-						bottom: parseInt(item.$container.css('border-bottom'), 10) || 0,
-						top: parseInt(item.$container.css('border-top'), 10) || 0
-					},
-					padding: {
-						bottom: parseInt(item.$container.css('padding-bottom'), 10) || 0,
-						top: parseInt(item.$container.css('padding-top'), 10) || 0
+					//If the element is smaller than the container
+					if(item.containerInnerHeight > item.elemHeight) {
+						_self.items.push(item);
 					}
-				};
-
-				item.containerInnerHeight = item.$container.height();
-				item.containerStart = item.$container.offset().top - _self.config.offset + _self.config.start + item.containerInner.padding.top + item.containerInner.border.top;
-				item.scrollFinish = item.containerStart - _self.config.start + (item.containerInnerHeight - item.elemHeight);
-
-				//If the element is smaller than the container
-				if(item.containerInnerHeight > item.elemHeight) {
-					_self.items.push(item);
+				} else {
+					item.$elem.removeClass(_self.config.stickClass + ' ' + _self.config.endStickClass);
 				}
+			};
+			
+			/* If the container contains images, wait for them to load */
+			if($(_self.config.container).find('img').length > 0) {
+				$(_self.config.container).find('img').load(function() {
+					loaded();
+				});
 			} else {
-				item.$elem.removeClass(_self.config.stickClass + ' ' + _self.config.endStickClass);
+				loaded();
 			}
 		},
 
