@@ -56,9 +56,14 @@
 			_self.$win.on('resize.stickem', $.proxy(_self.handleResize, _self));
 		},
 
+		reload: function() {
+			this.destroy();
+			this.init();
+		},
+		
 		destroy: function() {
 			var _self = this;
-
+			$('.stickit').removeClass('stickit');
 			_self.$win.off('scroll.stickem');
 			_self.$win.off('resize.stickem');
 		},
@@ -66,10 +71,19 @@
 		getItem: function(index, element) {
 			var _self = this;
 			var $this = $(element);
+			
+			var getContainer=function() {
+				var c=$this.parents(_self.config.container);
+				if(c.length > 0) {
+					return c;
+				}
+				return $this.next(_self.config.container);
+			};
+			
 			var item = {
 				$elem: $this,
 				elemHeight: $this.height(),
-				$container: $this.parents(_self.config.container),
+				$container: getContainer(),
 				isStuck: false
 			};
 			
@@ -175,16 +189,14 @@
 	Stickem.defaults = Stickem.prototype.defaults;
 
 	$.fn.stickem = function(options) {
+		var el=null;
 		//Create a destroy method so that you can kill it and call it again.
 		this.destroy = function() {
-			this.each(function() {
-				new Stickem(this, options).destroy();
-			});
+			el.destroy();
 		};
 
-		return this.each(function() {
-			new Stickem(this, options).init();
-		});
+		el= new Stickem(this, options).init();
+		return el;
 	};
 
 })(jQuery, window , document);
